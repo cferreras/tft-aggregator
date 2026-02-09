@@ -2,15 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { searchCompositionsAction } from "@/app/actions/search";
+import type { AppLocale, LocaleCopy } from "@/lib/i18n";
 import type { SearchResponse } from "@/lib/tft/types";
 
 interface TftSearchProps {
   initialData: SearchResponse;
+  locale: AppLocale;
+  copy: LocaleCopy;
 }
 
 const DEBOUNCE_MS = 220;
 
-export function TftSearch({ initialData }: TftSearchProps) {
+export function TftSearch({ initialData, locale, copy }: TftSearchProps) {
   const [query, setQuery] = useState(initialData.query);
   const [data, setData] = useState<SearchResponse>(initialData);
   const [isPending, startTransition] = useTransition();
@@ -21,7 +24,7 @@ export function TftSearch({ initialData }: TftSearchProps) {
       const currentRequest = ++requestId.current;
 
       startTransition(async () => {
-        const next = await searchCompositionsAction(query);
+        const next = await searchCompositionsAction(query, locale);
         if (requestId.current === currentRequest) {
           setData(next);
         }
@@ -29,20 +32,20 @@ export function TftSearch({ initialData }: TftSearchProps) {
     }, DEBOUNCE_MS);
 
     return () => clearTimeout(timeout);
-  }, [query]);
+  }, [locale, query]);
 
   const resultLabel = useMemo(() => {
     if (!query.trim()) {
-      return `${data.results.length} composiciones recientes`;
+      return `${data.results.length} ${copy.recentResultsText}`;
     }
-    return `${data.results.length} resultados para "${query.trim()}"`;
-  }, [data.results.length, query]);
+    return `${data.results.length} ${copy.resultsForText} "${query.trim()}"`;
+  }, [copy, data.results.length, query]);
 
   return (
     <>
       <div className="mt-8">
         <label htmlFor="tft-search" className="sr-only">
-          Buscar composiciones de TFT
+          {copy.searchLabel}
         </label>
         <input
           id="tft-search"
@@ -50,7 +53,7 @@ export function TftSearch({ initialData }: TftSearchProps) {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           list="tft-tags"
-          placeholder="Ej: set13, reroll, bruiser"
+          placeholder={copy.searchPlaceholder}
           className="h-12 w-full rounded-xl border border-edge bg-surface px-4 font-mono text-sm text-ink shadow-[0_1px_0_0_rgba(17,17,17,0.06)] outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10 sm:h-14 sm:text-base"
           autoComplete="off"
           spellCheck={false}
@@ -65,13 +68,12 @@ export function TftSearch({ initialData }: TftSearchProps) {
       </div>
 
       <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-        Busca composiciones de TFT de m&uacute;ltiples fuentes a trav&eacute;s de tags
-        generados autom&aacute;ticamente
+        {copy.description}
       </p>
 
       <div className="mt-8 flex items-center justify-between gap-3 text-xs text-muted sm:text-sm">
         <span>{resultLabel}</span>
-        <span>{isPending ? "Actualizando..." : "Actualizado"}</span>
+        <span>{isPending ? copy.updating : copy.updated}</span>
       </div>
 
       <ul id="tft-results" className="mt-4 space-y-3">

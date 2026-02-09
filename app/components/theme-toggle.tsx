@@ -6,6 +6,12 @@ type Theme = "light" | "dark";
 
 const THEME_STORAGE_KEY = "tft-theme";
 
+interface ThemeToggleProps {
+  label: string;
+  lightText: string;
+  darkText: string;
+}
+
 function applyTheme(theme: Theme): void {
   const root = document.documentElement;
   root.classList.toggle("theme-dark", theme === "dark");
@@ -20,7 +26,7 @@ function resolveInitialTheme(): Theme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({ label, lightText, darkText }: ThemeToggleProps) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") {
       return "light";
@@ -44,7 +50,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggleTheme}
       className="inline-flex h-9 items-center gap-2 rounded-full border border-edge bg-surface px-3 text-xs font-mono text-muted transition hover:text-ink"
-      aria-label="Cambiar tema"
+      aria-label={label}
       aria-pressed={theme === "dark"}
     >
       <span className="relative inline-flex h-4 w-8 items-center rounded-full border border-edge bg-canvas p-[2px]">
@@ -54,7 +60,7 @@ export function ThemeToggle() {
           }`}
         />
       </span>
-      <span>{theme === "dark" ? "Oscuro" : "Claro"}</span>
+      <span>{theme === "dark" ? darkText : lightText}</span>
     </button>
   );
 }

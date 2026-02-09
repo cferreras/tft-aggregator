@@ -1,4 +1,6 @@
 import { unstable_cache } from "next/cache";
+import { DEFAULT_LOCALE } from "@/lib/i18n";
+import type { AppLocale } from "@/lib/i18n";
 import { SITEMAP_SOURCES } from "@/lib/tft/sources";
 import type {
   CompositionIndex,
@@ -13,6 +15,13 @@ const INDEX_CACHE_VERSION = "v2";
 const MAX_RESULTS = 30;
 const MAX_SUGGESTIONS = 8;
 const MIN_DEFAULT_RESULTS_PER_SOURCE = 5;
+
+function isSourceEnabledForLocale(sourceId: string, locale: AppLocale): boolean {
+  if (locale === "en" && sourceId === "akawonder") {
+    return false;
+  }
+  return true;
+}
 
 function normalizeText(value: string): string {
   return value
@@ -349,12 +358,19 @@ export async function getCompositionIndex(): Promise<CompositionIndex> {
   return getCachedCompositionIndex();
 }
 
-export async function searchCompositions(query: string): Promise<SearchResponse> {
+export async function searchCompositions(
+  query: string,
+  locale: AppLocale = DEFAULT_LOCALE,
+): Promise<SearchResponse> {
   const index = await getCompositionIndex();
   const normalizedQuery = normalizeText(query);
   const queryTokens = queryToTokens(query);
-  const results = rankResults(index.compositions, queryTokens);
-  const suggestions = buildSuggestions(index.tags, normalizedQuery);
+  const localizedCompositions = index.compositions.filter((composition) =>
+    isSourceEnabledForLocale(composition.sourceId, locale),
+  );
+  const localizedTags = buildTagFrequency(localizedCompositions);
+  const results = rankResults(localizedCompositions, queryTokens);
+  const suggestions = buildSuggestions(localizedTags, normalizedQuery);
 
   return {
     query: normalizedQuery,
