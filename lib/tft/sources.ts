@@ -11,4 +11,9 @@ export const SITEMAP_SOURCES: SitemapSource[] = [
     label: "TFT Flow",
     sitemapUrl: "https://tftflow.com/sitemap.xml",
   },
+  {
+    id: "akawonder",
+    label: "AkaWonder",
+    sitemapUrl: "https://compos.akawonder.com/sitemap.xml",
+  },
 ];

@@ -101,6 +101,30 @@ function parseTftFlow(pathname: string): { set: number; name: string; tags: stri
   };
 }
 
+function parseAkaWonder(pathname: string): { set?: number; name: string; tags: string[] } | null {
+  const match = pathname.match(/^\/compositions\/([^/?#]+)\/?$/i);
+  if (!match) {
+    return null;
+  }
+
+  const slug = match[1];
+  const readableName = normalizeText(slug);
+  const letterAndNumberTokens = (slug.toLowerCase().match(/[a-z]+|\d+/g) ?? []).filter(
+    Boolean,
+  );
+  const tags = new Set<string>([
+    readableName,
+    ...tokenize(slug),
+    ...letterAndNumberTokens,
+  ]);
+
+  return {
+    set: undefined,
+    name: readableName,
+    tags: Array.from(tags).filter(Boolean),
+  };
+}
+
 function parseCompositionFromUrl(
   url: string,
   source: SitemapSource,
@@ -118,6 +142,8 @@ function parseCompositionFromUrl(
       ? parseTftAcademy(pathname)
       : source.id === "tftflow"
         ? parseTftFlow(pathname)
+        : source.id === "akawonder"
+          ? parseAkaWonder(pathname)
         : null;
 
   if (!parsed) {
