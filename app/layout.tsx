@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { getSiteUrl } from "@/lib/seo";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,10 +13,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
-  title: "TFT Aggregator",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "TFT Aggregator",
+    template: "%s | TFT Aggregator",
+  },
   description:
     "Busca composiciones de Teamfight Tactics de multiples fuentes mediante tags automaticos.",
+  applicationName: "TFT Aggregator",
   keywords: [
     "TFT",
     "Teamfight Tactics",
@@ -23,6 +31,32 @@ export const metadata: Metadata = {
     "TFT comps",
     "meta TFT",
   ],
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    languages: {
+      es: "/es",
+      en: "/en",
+      "x-default": "/es",
+    },
+  },
+  openGraph: {
+    type: "website",
+    title: "TFT Aggregator",
+    description:
+      "Busca composiciones de Teamfight Tactics de multiples fuentes mediante tags automaticos.",
+    siteName: "TFT Aggregator",
+    url: "/es",
+    locale: "es_ES",
+  },
+  twitter: {
+    card: "summary",
+    title: "TFT Aggregator",
+    description:
+      "Busca composiciones de Teamfight Tactics de multiples fuentes mediante tags automaticos.",
+  },
 };
 
 export default function RootLayout({
