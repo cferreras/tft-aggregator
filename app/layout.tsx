@@ -30,8 +30,32 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const themeInitScript = `
+    (function () {
+      try {
+        var key = "tft-theme";
+        var theme = localStorage.getItem(key);
+        if (theme !== "light" && theme !== "dark") {
+          theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        var root = document.documentElement;
+        if (theme === "dark") {
+          root.classList.add("theme-dark");
+        } else {
+          root.classList.remove("theme-dark");
+        }
+        root.style.colorScheme = theme;
+      } catch (error) {
+        // Ignore theme bootstrap errors.
+      }
+    })();
+  `;
+
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
