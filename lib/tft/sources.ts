@@ -13,7 +13,7 @@ export const SITEMAP_SOURCES: SitemapSource[] = [
   },
   {
     id: "akawonder",
-    label: "AkaWonder",
+    label: "AKAWonder",
     sitemapUrl: "https://compos.akawonder.com/sitemap.xml",
   },
 ];

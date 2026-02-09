@@ -9,8 +9,10 @@ import type {
 } from "@/lib/tft/types";
 
 const CACHE_REVALIDATE_SECONDS = 60 * 30;
+const INDEX_CACHE_VERSION = "v2";
 const MAX_RESULTS = 30;
 const MAX_SUGGESTIONS = 8;
+const MIN_DEFAULT_RESULTS_PER_SOURCE = 5;
 
 function normalizeText(value: string): string {
   return value
@@ -107,21 +109,16 @@ function parseAkaWonder(pathname: string): { set?: number; name: string; tags: s
     return null;
   }
 
-  const slug = match[1];
-  const readableName = normalizeText(slug);
-  const letterAndNumberTokens = (slug.toLowerCase().match(/[a-z]+|\d+/g) ?? []).filter(
-    Boolean,
-  );
-  const tags = new Set<string>([
-    readableName,
-    ...tokenize(slug),
-    ...letterAndNumberTokens,
-  ]);
+  const rawSlug = match[1];
+  const slugTag = normalizeText(rawSlug).replace(/\s+/g, "");
+  if (!slugTag) {
+    return null;
+  }
 
   return {
     set: undefined,
-    name: readableName,
-    tags: Array.from(tags).filter(Boolean),
+    name: slugTag,
+    tags: [slugTag],
   };
 }
 
@@ -227,22 +224,56 @@ async function createCompositionIndex(): Promise<CompositionIndex> {
 
 const getCachedCompositionIndex = unstable_cache(
   async () => createCompositionIndex(),
-  ["tft-aggregator:composition-index:v1"],
+  [`tft-aggregator:composition-index:${INDEX_CACHE_VERSION}`],
   {
     revalidate: CACHE_REVALIDATE_SECONDS,
   },
 );
 
 function rankResults(compositions: IndexedComposition[], queryTokens: string[]): SearchResult[] {
+  const toSearchResult = (composition: IndexedComposition): SearchResult => ({
+    url: composition.url,
+    sourceLabel: composition.sourceLabel,
+    sourceId: composition.sourceId,
+    name: composition.name,
+    setLabel: composition.set ? `Set ${composition.set}` : null,
+    tags: composition.tags,
+  });
+
   if (queryTokens.length === 0) {
-    return compositions.slice(0, MAX_RESULTS).map((composition) => ({
-      url: composition.url,
-      sourceLabel: composition.sourceLabel,
-      sourceId: composition.sourceId,
-      name: composition.name,
-      setLabel: composition.set ? `Set ${composition.set}` : null,
-      tags: composition.tags,
-    }));
+    const groupedBySource = new Map<string, IndexedComposition[]>();
+    for (const composition of compositions) {
+      const list = groupedBySource.get(composition.sourceId) ?? [];
+      list.push(composition);
+      groupedBySource.set(composition.sourceId, list);
+    }
+
+    const selected: IndexedComposition[] = [];
+    const seenUrls = new Set<string>();
+
+    for (const list of groupedBySource.values()) {
+      for (const composition of list.slice(0, MIN_DEFAULT_RESULTS_PER_SOURCE)) {
+        if (!seenUrls.has(composition.url)) {
+          selected.push(composition);
+          seenUrls.add(composition.url);
+        }
+      }
+    }
+
+    if (selected.length < MAX_RESULTS) {
+      for (const composition of compositions) {
+        if (selected.length >= MAX_RESULTS) {
+          break;
+        }
+        if (seenUrls.has(composition.url)) {
+          continue;
+        }
+        selected.push(composition);
+        seenUrls.add(composition.url);
+      }
+    }
+
+    return selected.slice(0, MAX_RESULTS).map(toSearchResult);
   }
 
   const scored = compositions
@@ -276,14 +307,7 @@ function rankResults(compositions: IndexedComposition[], queryTokens: string[]):
     .slice(0, MAX_RESULTS)
     .map((entry) => entry.composition);
 
-  return scored.map((composition) => ({
-    url: composition.url,
-    sourceLabel: composition.sourceLabel,
-    sourceId: composition.sourceId,
-    name: composition.name,
-    setLabel: composition.set ? `Set ${composition.set}` : null,
-    tags: composition.tags,
-  }));
+  return scored.map(toSearchResult);
 }
 
 function buildSuggestions(
