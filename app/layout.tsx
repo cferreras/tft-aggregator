@@ -14,7 +14,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "TFT Aggregator",
-  description: "TFT comp aggregator interface",
+  description:
+    "Busca composiciones de Teamfight Tactics de multiples fuentes mediante tags automaticos.",
+  keywords: [
+    "TFT",
+    "Teamfight Tactics",
+    "composiciones TFT",
+    "TFT comps",
+    "meta TFT",
+  ],
 };
 
 export default function RootLayout({
@@ -23,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

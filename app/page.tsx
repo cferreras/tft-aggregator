@@ -1,4 +1,11 @@
-export default function Home() {
+import { TftSearch } from "@/app/components/tft-search";
+import { searchCompositions } from "@/lib/tft";
+
+export const revalidate = 1800;
+
+export default async function Home() {
+  const initialData = await searchCompositions("");
+
   return (
     <main className="relative min-h-dvh overflow-hidden bg-canvas text-ink">
       <div
@@ -12,25 +19,7 @@ export default function Home() {
         <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
           TFT Aggregator
         </h1>
-
-        <div className="mt-8">
-          <label htmlFor="tft-search" className="sr-only">
-            Buscar composiciones de TFT
-          </label>
-          <input
-            id="tft-search"
-            type="text"
-            placeholder="Ej: reroll, level 8, vertical, bruiser"
-            className="h-12 w-full rounded-xl border border-edge bg-surface px-4 font-mono text-sm text-ink shadow-[0_1px_0_0_rgba(17,17,17,0.06)] outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10 sm:h-14 sm:text-base"
-            autoComplete="off"
-            spellCheck={false}
-          />
-        </div>
-
-        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-          Busca composiciones de TFT de m&uacute;ltiples fuentes a trav&eacute;s de
-          tags generados autom&aacute;ticamente
-        </p>
+        <TftSearch initialData={initialData} />
       </section>
     </main>
   );
