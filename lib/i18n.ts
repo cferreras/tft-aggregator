@@ -15,6 +15,8 @@ export interface LocaleCopy {
   themeLabel: string;
   themeLight: string;
   themeDark: string;
+  footerPrefix: string;
+  footerSuffix: string;
 }
 
 const ES_COPY: LocaleCopy = {
@@ -29,6 +31,8 @@ const ES_COPY: LocaleCopy = {
   themeLabel: "Cambiar tema",
   themeLight: "Claro",
   themeDark: "Oscuro",
+  footerPrefix: "Hecho por",
+  footerSuffix: "para la comunidad de TFT",
 };
 
 const EN_COPY: LocaleCopy = {
@@ -43,6 +47,8 @@ const EN_COPY: LocaleCopy = {
   themeLabel: "Toggle theme",
   themeLight: "Light",
   themeDark: "Dark",
+  footerPrefix: "Made by",
+  footerSuffix: "for the TFT community",
 };
 
 export function isAppLocale(value: string): value is AppLocale {

@@ -56,6 +56,20 @@ export function HomeShell({ locale, initialData }: HomeShellProps) {
           TFT Aggregator
         </h1>
         <TftSearch initialData={initialData} locale={locale} copy={copy} />
+        <footer className="mt-10 text-xs text-muted sm:text-sm">
+          <p>
+            {copy.footerPrefix}{" "}
+            <a
+              href="https://www.carlosferreras.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-edge underline-offset-4 transition hover:text-ink"
+            >
+              Carlos Ferreras
+            </a>{" "}
+            {copy.footerSuffix}
+          </p>
+        </footer>
       </section>
     </main>
   );
