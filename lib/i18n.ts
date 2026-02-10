@@ -21,13 +21,13 @@ export interface LocaleCopy {
 
 const ES_COPY: LocaleCopy = {
   searchLabel: "Buscar composiciones de TFT",
-  searchPlaceholder: "Ej: set13, reroll, bruiser",
+  searchPlaceholder: "Ej: sona, reroll, bruiser",
   description:
     "Busca composiciones de TFT de multiples fuentes a traves de tags generados automaticamente",
   updated: "Actualizado",
   updating: "Actualizando...",
   recentResultsText: "composiciones recientes",
-  resultsForText: 'resultados para',
+  resultsForText: "resultados para",
   themeLabel: "Cambiar tema",
   themeLight: "Claro",
   themeDark: "Oscuro",
@@ -37,7 +37,7 @@ const ES_COPY: LocaleCopy = {
 
 const EN_COPY: LocaleCopy = {
   searchLabel: "Search TFT compositions",
-  searchPlaceholder: "Ex: set13, reroll, bruiser",
+  searchPlaceholder: "Ex: sona, reroll, bruiser",
   description:
     "Search TFT compositions from multiple sources through automatically generated tags",
   updated: "Updated",
