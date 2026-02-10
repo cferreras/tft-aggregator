@@ -4,6 +4,10 @@ TFT compositions aggregator that indexes multiple public sitemap sources, normal
 
 Languages: [English](./README.md) | [Espanol](./README.es.md)
 
+## Screenshot
+
+![TFT Aggregator - English](./public/readme/tft-aggregator-en.png)
+
 ## Quick Start
 
 1. Install dependencies:
@@ -97,4 +101,3 @@ Compatible with Vercel or any Node.js platform that supports Next.js.
 npm run build
 npm run start
 ```
-

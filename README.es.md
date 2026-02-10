@@ -4,6 +4,10 @@ Buscador de composiciones de Teamfight Tactics (TFT) que agrega resultados desde
 
 Idiomas: [English](./README.md) | [Español](./README.es.md)
 
+## Captura
+
+![TFT Aggregator - Espanol](./public/readme/tft-aggregator-es.png)
+
 ## Demo local rápida
 
 1. Instala dependencias:
