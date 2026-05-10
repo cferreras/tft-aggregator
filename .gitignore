@@ -41,3 +41,9 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# tft background images (generated, but tracked in git for deployment)
+# /public/images/bg/
+
+# raw tft assets (too large for git)
+/tft_assets/

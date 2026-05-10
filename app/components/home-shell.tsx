@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TftSearch } from "@/app/components/tft-search";
 import { ThemeToggle } from "@/app/components/theme-toggle";
 import { getLocaleCopy } from "@/lib/i18n";
+import { getRandomBgImage } from "@/lib/bg-image";
 import type { AppLocale } from "@/lib/i18n";
 import type { SearchResponse } from "@/lib/tft/types";
 
@@ -12,14 +13,23 @@ interface HomeShellProps {
 
 export function HomeShell({ locale, initialData }: HomeShellProps) {
   const copy = getLocaleCopy(locale);
+  const bgImage = getRandomBgImage();
 
   return (
     <main className="relative min-h-dvh overflow-hidden bg-canvas text-ink">
+      {bgImage && (
+        <div
+          className="hero-bg absolute inset-0"
+          aria-hidden="true"
+          style={{ backgroundImage: `url(${bgImage})` }}
+        />
+      )}
       <div
-        className="pointer-events-none absolute inset-0 opacity-55"
+        className="pointer-events-none absolute inset-0"
         aria-hidden="true"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,var(--hero-glow),transparent_45%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(var(--bg-top),0.85),rgba(var(--bg-bottom),0.95))]" />
       </div>
 
       <section className="relative mx-auto flex min-h-dvh w-full max-w-3xl flex-col justify-center px-6 py-20 sm:px-10">

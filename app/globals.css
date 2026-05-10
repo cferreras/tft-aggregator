@@ -10,6 +10,8 @@
   --bg-bottom: 252, 252, 252;
   --pattern-rgb: 17, 17, 17;
   --hero-glow: rgba(17, 17, 17, 0.06);
+  --bg-image-brightness: 1.8;
+  --bg-image-saturate: 0;
 }
 
 :root.theme-dark {
@@ -22,6 +24,8 @@
   --bg-bottom: 15, 15, 17;
   --pattern-rgb: 255, 255, 255;
   --hero-glow: rgba(255, 255, 255, 0.12);
+  --bg-image-brightness: 0.3;
+  --bg-image-saturate: 0;
 }
 
 @theme inline {
@@ -53,4 +57,12 @@ body {
   transition:
     background-color 220ms ease,
     color 220ms ease;
+}
+
+.hero-bg {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(var(--bg-image-brightness)) saturate(var(--bg-image-saturate));
+  transition: filter 220ms ease;
 }

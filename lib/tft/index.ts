@@ -11,7 +11,7 @@ import type {
 } from "@/lib/tft/types";
 
 const CACHE_REVALIDATE_SECONDS = 60 * 30;
-const INDEX_CACHE_VERSION = "v2";
+const INDEX_CACHE_VERSION = "v3";
 const MAX_RESULTS = 30;
 const MAX_SUGGESTIONS = 8;
 const MIN_DEFAULT_RESULTS_PER_SOURCE = 5;
@@ -51,19 +51,32 @@ function decodeXmlText(value: string): string {
     .replace(/&#39;/g, "'");
 }
 
-function extractLocUrls(xml: string): string[] {
-  const locations: string[] = [];
-  const locRegex = /<loc>([\s\S]*?)<\/loc>/gm;
+interface SitemapEntry {
+  url: string;
+  lastmod?: string;
+}
 
-  for (const match of xml.matchAll(locRegex)) {
-    const rawUrl = match[1]?.trim();
-    if (!rawUrl) {
+function extractSitemapEntries(xml: string): SitemapEntry[] {
+  const entries: SitemapEntry[] = [];
+  const urlBlockRegex = /<url>([\s\S]*?)<\/url>/gm;
+
+  for (const blockMatch of xml.matchAll(urlBlockRegex)) {
+    const block = blockMatch[1] ?? "";
+
+    const locMatch = /<loc>([\s\S]*?)<\/loc>/i.exec(block);
+    const lastmodMatch = /<lastmod>([\s\S]*?)<\/lastmod>/i.exec(block);
+
+    if (!locMatch?.[1]) {
       continue;
     }
-    locations.push(decodeXmlText(rawUrl));
+
+    entries.push({
+      url: decodeXmlText(locMatch[1].trim()),
+      lastmod: lastmodMatch?.[1]?.trim(),
+    });
   }
 
-  return locations;
+  return entries;
 }
 
 function parseTftAcademy(pathname: string): { set: number; name: string; tags: string[] } | null {
@@ -112,28 +125,33 @@ function parseTftFlow(pathname: string): { set: number; name: string; tags: stri
   };
 }
 
-function parseAkaWonder(pathname: string): { set?: number; name: string; tags: string[] } | null {
-  const match = pathname.match(/^\/compositions\/([^/?#]+)\/?$/i);
+function parseAkaCompos(pathname: string): { set: number; name: string; tags: string[] } | null {
+  const match = pathname.match(/^\/set(\d+)\/([^/?#]+)\/?$/i);
   if (!match) {
     return null;
   }
 
-  const rawSlug = match[1];
-  const slugTag = normalizeText(rawSlug).replace(/\s+/g, "");
-  if (!slugTag) {
+  const set = Number(match[1]);
+  if (!Number.isFinite(set)) {
     return null;
   }
 
+  const slug = match[2];
+  const readableName = normalizeText(slug);
+  const tokens = tokenize(slug);
+  const tags = new Set<string>([`set${set}`, readableName, ...tokens]);
+
   return {
-    set: undefined,
-    name: slugTag,
-    tags: [slugTag],
+    set,
+    name: readableName,
+    tags: Array.from(tags).filter(Boolean),
   };
 }
 
 function parseCompositionFromUrl(
   url: string,
   source: SitemapSource,
+  lastmod?: string,
 ): IndexedComposition | null {
   let parsedUrl: URL;
   try {
@@ -149,7 +167,7 @@ function parseCompositionFromUrl(
       : source.id === "tftflow"
         ? parseTftFlow(pathname)
         : source.id === "akawonder"
-          ? parseAkaWonder(pathname)
+          ? parseAkaCompos(pathname)
         : null;
 
   if (!parsed) {
@@ -157,12 +175,15 @@ function parseCompositionFromUrl(
   }
 
   return {
-    url: parsedUrl.toString(),
+    url: source.id === "akawonder"
+      ? parsedUrl.toString().replace("akacompos.com", "compos.akawonder.com")
+      : parsedUrl.toString(),
     sourceId: source.id,
     sourceLabel: source.label,
     set: parsed.set,
     name: parsed.name,
     tags: parsed.tags,
+    lastmod,
   };
 }
 
@@ -179,10 +200,10 @@ async function fetchSourceCompositions(source: SitemapSource): Promise<IndexedCo
   }
 
   const xml = await response.text();
-  const urls = extractLocUrls(xml);
+  const entries = extractSitemapEntries(xml);
 
-  return urls
-    .map((url) => parseCompositionFromUrl(url, source))
+  return entries
+    .map((entry) => parseCompositionFromUrl(entry.url, source, entry.lastmod))
     .filter((composition): composition is IndexedComposition => composition !== null);
 }
 

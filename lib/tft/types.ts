@@ -11,6 +11,7 @@ export interface IndexedComposition {
   set?: number;
   name: string;
   tags: string[];
+  lastmod?: string;
 }
 
 export interface CompositionIndex {
