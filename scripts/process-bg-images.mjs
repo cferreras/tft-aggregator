@@ -13,8 +13,8 @@ const BLUR_SIGMA = 0.5;
 
 async function processBgImages() {
   if (!existsSync(ASSETS_DIR)) {
-    console.error(`Assets directory not found: ${ASSETS_DIR}`);
-    process.exit(1);
+    console.log(`Assets directory not found: ${ASSETS_DIR} — skipping image processing.`);
+    return;
   }
 
   await rm(OUTPUT_DIR, { recursive: true, force: true });
@@ -26,8 +26,8 @@ async function processBgImages() {
   );
 
   if (imageFiles.length === 0) {
-    console.error("No image files found in assets directory");
-    process.exit(1);
+    console.log("No image files found in assets directory — skipping.");
+    return;
   }
 
   const manifest = [];
